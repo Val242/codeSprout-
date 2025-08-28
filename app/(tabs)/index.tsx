@@ -1,11 +1,19 @@
+import { useAuthStore } from '@/utils/authStore';
+import { Button } from '@react-navigation/elements';
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const HomeTab = () => {
+  const { logIn } = useAuthStore(); 
+  const { logOut } = useAuthStore(); 
   return (
     <SafeAreaView style={styles.container}>
+      
       <Text>Home Screen</Text>
+       
+            <Button onPress={logOut}>Log out</Button>
+
     </SafeAreaView>
   );
 };
