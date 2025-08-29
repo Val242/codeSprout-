@@ -12,7 +12,7 @@ const FinalScreen = () => {
     <View style= {styles.header}>
       <Text style= {styles.header} >Onboarding Screen 1</Text>
       
-          <Button onPress ={completeOnboarding} > Go to screen 2</Button>
+          <Button onPress ={completeOnboarding} > Start Using App</Button>
       
       
     </View>
