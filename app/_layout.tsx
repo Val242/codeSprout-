@@ -1,11 +1,18 @@
 import { useAuthStore } from "@/utils/authStore";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { Stack } from "expo-router";
 import React from "react";
+
+const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
+  unsavedChangesWarning: false,
+});
+
 
 export default function Layout() {
   const { isLoggedIn, shouldCreateAccount, hasCompletedOnboarding } = useAuthStore();
 
   return (
+     <ConvexProvider client={convex}>
     <Stack
       screenOptions={{
         headerStyle: { backgroundColor: "#1e1e1e" },
@@ -33,5 +40,6 @@ export default function Layout() {
         <Stack.Screen name="SignIn" options={{ title: "SignIn" }} />
       </Stack.Protected>
     </Stack>
+    </ConvexProvider>
   );
 }

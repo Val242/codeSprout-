@@ -1,7 +1,9 @@
-import { useAuthStore } from "@/utils/authStore";
+import { api } from "@/convex/_generated/api";
 import { Ionicons } from "@expo/vector-icons";
+import { useMutation } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
+
 import {
   Alert,
   Keyboard,
@@ -14,32 +16,41 @@ import {
 } from "react-native";
 
 const CreateAccount = () => {
-  const { logIn, createAccount, goToSignIn } = useAuthStore(); // Zustand actions
+  // Convex mutation
+  const createUser = useMutation(api.users._insertUser);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [passwordHash, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSignUp = () => {
-    if (!fullName || !email || !password || !confirmPassword) {
+  const handleSignUp = async () => {
+    if (!fullName || !email || !passwordHash || !confirmPassword) {
       Alert.alert("Error", "Please fill all fields");
       return;
     }
-    if (password !== confirmPassword) {
+    if (passwordHash !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match");
       return;
     }
 
-    // Create account in state
-    createAccount();
+    try {
+      await createUser({
+        fullName,
+        email,
+        passwordHash,
+      });
 
-    // Optionally log in immediately
-    logIn();
-
-    Alert.alert("Success", `Account created for ${fullName}`);
+      Alert.alert("Success", `Account created for ${fullName}`);
+      setFullName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Something went wrong");
+    }
   };
 
   return (
@@ -64,11 +75,12 @@ const CreateAccount = () => {
           placeholderTextColor="#888"
         />
 
+        {/* Password */}
         <View style={styles.passwordContainer}>
           <TextInput
             style={[styles.input, { flex: 1 }]}
             placeholder="Password"
-            value={password}
+            value={passwordHash}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
             placeholderTextColor="#888"
@@ -83,6 +95,7 @@ const CreateAccount = () => {
           </TouchableOpacity>
         </View>
 
+        {/* Confirm Password */}
         <View style={styles.passwordContainer}>
           <TextInput
             style={[styles.input, { flex: 1 }]}
@@ -104,19 +117,12 @@ const CreateAccount = () => {
           </TouchableOpacity>
         </View>
 
+        {/* Sign Up Button */}
         <TouchableOpacity onPress={handleSignUp} style={{ width: "100%" }}>
           <LinearGradient colors={["#00B140", "#00FF80"]} style={styles.button}>
             <Text style={styles.buttonText}>Sign Up</Text>
           </LinearGradient>
         </TouchableOpacity>
-
-        {/* Test Buttons */}
-        <View style={{ marginTop: 16 }}>
-         <Text style={{textAlign: "center"}}>Already have an account? </Text>
-          <TouchableOpacity onPress={goToSignIn} style={styles.testButton}>
-            <Text style={styles.testButtonText}>Go to Sign In</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -163,17 +169,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 18,
-  },
-  testButton: {
-    backgroundColor: "#00B140",
-    padding: 12,
-    borderRadius: 10,
-    marginTop: 8,
-    alignItems: "center",
-  },
-  testButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
   },
 });
 
